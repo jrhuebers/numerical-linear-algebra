@@ -1,0 +1,217 @@
+\documentclass[a4paper, 11pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{graphicx}
+
+\usepackage{paralist}
+
+\title{Schnittstellendokumentation aufgabe4.py}
+\author{Johannes Hübers, Cedric Brügmann, PPI11}
+
+\begin{document}
+\maketitle
+
+\section{Einleitung}
+Dies ist die Schnittstellendokumentation des Pythonprogramms \texttt{aufgabe4.py}. Das Modul enthält Methoden zum Lösen von überbestimmten linearen Gleichungssystemen und zum Approximieren einer hängenden Kette mithilfe von Exponentialfunktionen. Zur Visualisierung der Experimente dienen Funktionen, die die Kettenapproximation, die Konditionen relevanter Matrizen und die Norm des Residuums, das heißt den Fehler der Approximation, zeichnen.
+
+In \texttt{aufgabe4.py} ist eine main-Funktion implementiert, die die Methoden demonstriert und Plots für die Präsentation erstellt. Hierzu werden drei Dateien als Datenreihen eingelesen, \texttt{originaldaten}, \texttt{daten2}, \texttt{daten3}. Die Anfangs- und Endpunkte \texttt{(x,y)} der geordneten Datenreihen werden als Endpunkte einer hängenden Kette interpretiert. Mithilfe der Methoden zum Lösen überbestimmter linearer Gleichungssysteme können dann Parameter $a,b,c,d \in \mathbb{R}$ ermittelt werden, damit die Gestalt der hängenden Kette durch
+$y = ae^{dx} + be^{-dx} + c$ angenähert werden kann.
+
+\section{aufgabe4.py}
+\subsection{solve\_least\_squares}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{a} \textit{(numpy.ndarray)}:
+    $m \times n$-Matrix vollen Spaltenrangs ($m \geq n$)
+\item \texttt{b} \textit{(numpy.ndarray)}:
+    1D-Vektor mit $m$ Einträgen
+\end{itemize} 
+
+\noindent \textbf{Returns:}
+\begin{itemize}
+    \item \textit{numpy.ndarray}: 1D-Vektor mit $n$ Einträgen, Lösung $x$ von $a \cdot x = b$
+    \item \textit{float}: Residuum $\| a \cdot x - b \|$
+\end{itemize}
+
+\noindent Diese Funktion approximiert mit der Methode der kleinsten Quadrate die Lösung eines überbestimmten linearen Gleichungssystems $a \cdot x = b$ für eine $m \times n$-Matrix vollen Spaltenrangs a ($m\geq n$) und einen Vektor $b$. Hierfür wird die $QR$-Zerlegung der Matrix berechnet. Wenn die Matrix nicht vollen Spaltenrangs ist, bricht das Programm ab.
+
+
+
+\subsection{get\_conditions}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{a} \textit{(numpy.ndarray)}:
+    $m \times n$-Matrix ($m\geq n$) vollen Spaltenrangs
+\end{itemize}
+
+\noindent \textbf{Returns:}
+\begin{itemize}
+    \item \textit{float}: Kondition von $a$
+    \item \textit{float}: Kondition von $a^T \cdot a$
+\end{itemize}
+
+\noindent Diese Funktion gibt für eine nicht notwendigerweise quadratische $m \times n$-Matrix ($m \geq n$) $a$ vollen Spaltenrangs die Konditionen von $a$ und des Produkts $a^T \cdot a$ aus.
+
+
+
+\subsection{solve\_r}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{r} \textit{(numpy.ndarray)}:
+    Obere $m \times n$-Dreiecksmatrix $(m \geq n)$ vollen Spaltenrangs
+    \item \texttt{z} \textit{(numpy.ndarray)}:
+    Vektor der Länge $m$
+\end{itemize}
+
+\noindent \textbf{Returns:}
+\begin{itemize}
+    \item \texttt{x} \textit{(numpy.ndarray)}:
+    Lösungsvektor $x$ von $r \cdot x = z$ der Länge $n$
+\end{itemize}
+
+\noindent Die Funktion löst für eine obere $m \times n$-Dreiecksmatrix $r, m \geq n,$ vollen Spaltenrangs und einen Vektor $z$ das lineare Gleichungssystem $r \cdot x = z$ und gibt die Lösung $x$ zurück.
+
+
+
+\subsection{read\_data\_set}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{path} \textit{(string)}:
+    Dateipfad des Datensatz
+    \item \texttt{selection} \textit{(iterable (ints))}:
+    Gibt eine Auswahl von Datenpunkten (Zeilen), die in eine Liste eingelesen werden sollen an
+\end{itemize}
+
+\noindent \textbf{Returns:}
+\begin{itemize}
+    \item \texttt{chain} \textit{iterable (tuples of ints)}:
+    Liste von eingelesenen Datenpunkten
+\end{itemize}
+
+\noindent Diese Funktion liest für gegebenen Dateipfad eine Auswahl von Datenpunkten $(x,y)$ aus einem Datensatz ein und gibt sie als Liste aus. Der Pfad der Datei muss als Parameter angegeben werden und auch die Auswahl, ein \textit{iterable} von \textit{ints}, wobei jede Zahl auf eine Zeile (erste Zeile entspricht Zahl 0) in der Datei hinweist, die eingelesen werden soll. Jedes Wertepaar $(x,y)$ erhält in der Datei eine eigene Zeile und die Einträge $x, y$ werden durch ein Komma getrennt.
+
+
+
+\subsection{approx\_chain}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{chain} \textit{(iterable)}:
+    Iterable von Datenpunkten \texttt{(x, y)} \textit{(tuple)} einer Kette
+    \item \texttt{d} \textit{(float)}:
+\end{itemize}
+
+\noindent \textbf{Returns:}
+\begin{itemize}
+    \item \texttt{x} \textit{(numpy.ndarray)}:
+    1D-Vektor mit $n$ Einträgen, Lösung $x$ von $a \cdot x = b$
+    \item \texttt{residuum} \textit{(float)}:
+\end{itemize}
+
+\noindent Die Methode gibt für gegebenen Datensatz, ein \textit{iterable} von \textit{tuples} $(x,y)$, die Punkte einer Kette repräsentieren, und Lösungsparameter d die anderen Lösungsparameter a, b, c, mit denen die Kette beschrieben werden kann, und das Residuum der kleinste-Quadrate-Lösung, das heißt den Approximationsfehler
+
+
+
+\subsection{approx\_d}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{chain} \textit{(iterable)}:
+    Sammlung von Datenpunkten \texttt{(x, y)} \textit{(tuple)} einer Kette
+\end{itemize}
+
+\noindent \textbf{Returns:}
+\begin{itemize}
+    \item \texttt{best\_d} \textit{(float)}:
+    Approximation des Lösungsparameters $d$
+\end{itemize}
+
+\noindent Die Funktion findet im Intervall $[0.1, 0.5]$ eine Näherung an den zur Minimierung des Residuums bei der Kettenapproximation optimalen Lösungsparameter $d.$ Der Datensatz sollte eine Liste von \textit{tuples} mit 2 \textit{float}-Einträgen $x, y$, die Punkte einer Kette repräsentieren, sein.
+
+
+
+\subsection{plot\_residuum\_for\_d}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{chain\_list} \textit{(iterable)}:
+    Sammlung von Datensätzen (Listen von Datenpunkten \texttt{(x, y)} \textit{(tuples)}), für die die Lösung approximiert und das Residuum gezeichnet werden soll
+    \item \texttt{labels=0} \textit{(iterable (strings))}:
+    Sammlung von Legendenbeschreibungen \textit{(strings)} für die gegebenen Datensätze. Bei Standard \texttt{0} wird keine Legende erstellt
+\end{itemize}
+
+\noindent Diese Funktion berechnet und plottet das Residuum $\|Ax - b\|$ für Lösungsapproximationen mit dem kleinste-Quadrate-Verfahren der Kettenapproximation zu gegebenen Datensätzen (Ketten) über Werte von $d$ zwischen $0.1$ und $0.5$.
+
+
+
+\subsection{plot\_conditions\_for\_d}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{chain\_list} \textit{(iterable)}:
+    Sammlung von Datensätzen (Listen von Datenpunkten \texttt{(x, y)} \textit{(tuples)}), für die die
+    Konditionen der zur Problemlösung genutzten Matrix $A$ und des Produkts $A^T \cdot A$ berechnet werden sollen
+    \item \texttt{labels=0} \textit{(iterable (strings))}:
+    Sammlung von \textit{strings,} enthält die Legendenbeschreibungen der Plots zu den Datensätzen aus \texttt{chain\_list}. Beim Standard \texttt{0} wird keine Legende erstellt 
+\end{itemize}
+
+\noindent Diese Funktion berechnet und plottet die Konditionen der Matrizen $A$ und $A^T \cdot A$ für die Lösungsnäherung mit dem kleinste-Quadrate-Verfahren der Kettenapproximation für gegebene Datensätze (Ketten) über Werte von $d$ zwischen $0.1$ und $0.5.$ 
+
+
+
+\subsection{plot\_multiple\_approximations}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{chain\_list} \textit{(iterable)}:
+        Sammlung von Datensätzen (Ketten), Listen von Datenpunkten (\textit{tuples} \texttt{(x, y)}), für die jeweils das Problem gelöst werden soll. Die erste Datenreihe wird im Schaubild mit eingezeichnet
+    \item \texttt{d\_list} \textit{(iterable)}:
+        Sammlung von Listen, die für Index-korrespondierende Datensätze aus \texttt{chain\_list} die zu betrachtenden Werte für $d$ enthalten
+    \item \texttt{labels=0} \textit{(iterable (strings))}:
+        Sammlung der Beschreibungen \textit{(strings)} der einzelnen Plots für jeden Datensatz und jedes $d$, Beschreibungen erscheinen in Legende.
+        Bei Standard \texttt{0} wird keine Legende erstellt
+    \item \texttt{title="Kettenapproximationen"} \textit{(string)}:
+    Titel des Plots, erscheint über dem Schaubild, Standard ist "Kettenapproximationen" 
+\end{itemize}
+
+\noindent Diese Funktion berechnet die Kettenapproximationen für verschiedene Datensätze und Parameter $d$ und stellt sie und die erste in \texttt{chain\_list} gegebene Datenreihe in einem Schaubild dar.
+
+
+
+\subsection{plot\_datasets}
+
+\textbf{Input:}
+\begin{itemize}
+    \item \texttt{ds\_list} \textit{(iterable)}:
+        Enthält die zu plottenden Listen von Tupeln \texttt{(x,y)} (Datenpunkten)
+    \item \texttt{labels=0} \textit{(iterable (strings))}:
+        Sammlung der Beschreibungen \textit{(strings)} der einzelnen Plots für jeden Datensatz und jedes $d$, Beschreibungen erscheinen in Legende.
+        Bei Standard \texttt{0} wird keine Legende erstellt
+\end{itemize}
+
+\noindent Die Funktion dient zum Plotten von Datenreihen, ohne Lösungen.
+
+
+
+\subsection{main}
+\noindent main-Funktion von \texttt{aufgabe4.py}, wird bei Ausführung des Moduls als Hauptprogramm ausgeführt.  Demonstriert Methoden aus dem Modul. Hierbei werden Plots der Kettenapproximationen für verschiedene Lösungsparameter $d$ und Datensätze \texttt{chain}, \texttt{chain2}, \texttt{chain3}, und Plots des Residuums und der Konditionen von $A$ und $A^T \cdot A$ über $d$ für die Datensätze produziert.
+
+
+
+
+
+\section{Datenreihen}
+Zum Programm gehören die drei Textdateien \texttt{originaldaten}, \texttt{daten2}, \texttt{daten3}: In diesen werden Punkte \texttt{(x,y)} von zu approximierenden Ketten gespeichert, auf jeden Punkt entfällt hierbei eine Zeile, die Einträge \texttt{x}, \texttt{y} werden dann innerhalb dieser Zeile durch ein Komma getrennt.
+
+Die Dateien \texttt{daten2} und \texttt{daten3} sind Modifikationen von \texttt{originaldaten}: Bei \texttt{daten2} wurden $x$- und $y$-Werte je auf die nächste ganze Zahl gerundet, bei \texttt{daten3} wurden sie abgerundet.
+
+\end{document}
+
